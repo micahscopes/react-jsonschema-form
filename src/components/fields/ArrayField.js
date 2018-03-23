@@ -16,7 +16,7 @@ import {
   getDefaultRegistry,
 } from "../../utils";
 
-function ArrayFieldTitle({ TitleField, idSchema, title, required }) {
+export function ArrayFieldTitle({ TitleField, idSchema, title, required }) {
   if (!title) {
     // See #312: Ensure compatibility with old versions of React.
     return <div />;
@@ -25,7 +25,11 @@ function ArrayFieldTitle({ TitleField, idSchema, title, required }) {
   return <TitleField id={id} title={title} required={required} />;
 }
 
-function ArrayFieldDescription({ DescriptionField, idSchema, description }) {
+export function ArrayFieldDescription({
+  DescriptionField,
+  idSchema,
+  description,
+}) {
   if (!description) {
     // See #312: Ensure compatibility with old versions of React.
     return <div />;
@@ -259,41 +263,48 @@ class ArrayField extends Component {
     };
   };
 
+  onReorder = (index, newIndex) => {
+    let move = (from, to, fromIndex, toIndex) => {
+      let shift = toIndex < fromIndex ? -1 : 1;
+      for (let i in from) {
+        i = Number(i);
+        if (i == fromIndex) {
+          to[toIndex] = from[fromIndex];
+        } else if (
+          i < Math.min(fromIndex, toIndex) ||
+          i > Math.max(toIndex, fromIndex)
+        ) {
+          to[i] = from[i];
+        } else if (shift > 0) {
+          to[i - 1] = from[i];
+        } else if (shift < 0) {
+          to[i + 1] = from[i];
+        } else if (i == toIndex) {
+          to[i - shift] = from[i];
+        }
+      }
+    };
+
+    const { formData, onChange } = this.props;
+    let newErrorSchema;
+    if (this.props.errorSchema) {
+      newErrorSchema = {};
+      const errorSchema = this.props.errorSchema;
+      move(errorSchema, newErrorSchema, index, newIndex);
+    }
+    let newFormData = [];
+    move(formData, newFormData, index, newIndex),
+      console.log("moving ARRAY!!!!", index, newIndex, formData, newFormData);
+    onChange(newFormData, newErrorSchema);
+  };
+
   onReorderClick = (index, newIndex) => {
     return event => {
       if (event) {
         event.preventDefault();
         event.target.blur();
       }
-      const { formData, onChange } = this.props;
-      let newErrorSchema;
-      if (this.props.errorSchema) {
-        newErrorSchema = {};
-        const errorSchema = this.props.errorSchema;
-        for (let i in errorSchema) {
-          if (i == index) {
-            newErrorSchema[newIndex] = errorSchema[index];
-          } else if (i == newIndex) {
-            newErrorSchema[index] = errorSchema[newIndex];
-          } else {
-            newErrorSchema[i] = errorSchema[i];
-          }
-        }
-      }
-      onChange(
-        formData.map((item, i) => {
-          // i is string, index and newIndex are numbers,
-          // so using "==" to compare
-          if (i == newIndex) {
-            return formData[index];
-          } else if (i == index) {
-            return formData[newIndex];
-          } else {
-            return item;
-          }
-        }),
-        newErrorSchema
-      );
+      this.onReorder(index, newIndex);
     };
   };
 
@@ -404,8 +415,7 @@ class ArrayField extends Component {
       idSchema,
       uiSchema,
       onAddClick: this.onAddClick,
-      onReorder: this.onReorderClick,
-      onDropIndex: this.onDropIndexClick,
+      onReorder: this.onReorder,
       readonly,
       required,
       schema,
@@ -574,6 +584,7 @@ class ArrayField extends Component {
         });
       }),
       onAddClick: this.onAddClick,
+      onReorder: this.onReorder,
       readonly,
       required,
       schema,
