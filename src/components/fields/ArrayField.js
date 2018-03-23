@@ -404,6 +404,8 @@ class ArrayField extends Component {
       idSchema,
       uiSchema,
       onAddClick: this.onAddClick,
+      onReorder: this.onReorderClick,
+      onDropIndex: this.onDropIndexClick,
       readonly,
       required,
       schema,
