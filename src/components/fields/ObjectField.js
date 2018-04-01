@@ -75,6 +75,7 @@ class ObjectField extends Component {
       readonly,
       onBlur,
       onFocus,
+      onChange,
       registry = getDefaultRegistry(),
     } = this.props;
     const { definitions, fields, formContext } = registry;
@@ -137,6 +138,7 @@ class ObjectField extends Component {
       uiSchema,
       schema,
       formData,
+      onChange,
       formContext,
     };
     return <Template {...templateProps} />;

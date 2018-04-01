@@ -294,8 +294,6 @@ class ArrayField extends Component {
     }
     let newFormData = [];
     move(formData, newFormData, index, newIndex);
-
-    // console.log("moving ARRAY!!!!",index,newIndex,formData,newFormData);
     onChange(newFormData, newErrorSchema);
   };
 
